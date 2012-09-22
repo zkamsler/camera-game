@@ -9,7 +9,7 @@ var isColorOrange = function(r, g, b) {
         delta = max - min,
         average = (r+g+b)/3;
 
-    return (r > g && r > b) && ((delta / max) > 0.40) && max > 180 && average > 25 && average < 240;
+    return (r > g && r > b) && ((delta / max) > 0.40) && max > 180 && average > 25 && average < 235;
 };
 
 var isOrange = function(ctx, x, y) {
@@ -51,17 +51,43 @@ var paintRectOrange = function(ctx, x, y, w, h) {
   ctx.putImageData(colors, 0, 0);
 };
 
+var width = 640;
+var height = 480;
+var halfwidth = width/2;
+
+var updateFall = function(ctx, obj, dt, time) {
+  obj.y += 0.001 * obj.speed * dt;
+  if(obj.y > height+50) {
+    obj.y = 0;
+    obj.speed = obj.visible ? obj.defaultSpeed : obj.speed * 1.1;
+    obj.visible = true;
+    obj.entry = (Math.random() * width/ 2) + (width/4);
+  }
+
+  obj.x = obj.entry + Math.sin(time*0.005) * 50;
+};
+
 
 window.onload = function(){
   var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
-  var ypos = 10;
-  var visible = true;
-  var width = 640;
-  var height = 480;
-  var halfwidth = width/2;
-  var entry = halfwidth;
-  var defaultSpeed = 200;
-  var speed = defaultSpeed;
+
+  var shapes = [
+  {
+    y : 900,
+    x : halfwidth,
+    speed : 0,
+    entry : halfwidth,
+    visible : true,
+    defaultSpeed : 150
+  },
+  {
+    y : 900,
+    speed : 0,
+    entry : 200,
+    visible : true,
+    defaultSpeed : 200
+  }
+  ];
 
   var draw = function(video, dt, time) {
     ctx.save();
@@ -73,23 +99,13 @@ window.onload = function(){
     paintRectOrange(ctx,0,0,width,height);
     //return;
 
-    ypos += 0.001 * speed * dt;
-    if(ypos > height+50) {
-      ypos = 0;
-      speed = visible ? defaultSpeed : speed * 1.1;
-      visible = true;
-      entry = (Math.random() * width/ 2) + (width/4);
-    }
-
-
-    var xpos = entry + Math.sin(time*0.005) * 50;
-
-    visible = visible && !isRectOrange(ctx, xpos-15, ypos-15, 30, 30);//isOrange(ctx,xpos,ypos);
-
-    //var asRGB = "rgb(" + r +"," +g+","+b+")";
-    //ctx.fillStyle = isOrange(ctx,xpos,ypos) ? "rgb(255,0,0)" : "rgb(0,0,0)";
-    if(visible) {
-      ctx.fillRect (xpos-25, ypos-25, 55, 50);
+    for(var i = 0; i < shapes.length; ++i) {
+      var obj = shapes[i];
+      updateFall(ctx, obj, dt, time);
+      obj.visible = obj.visible && !isRectOrange(ctx, obj.x-15, obj.y-15, 30, 30);
+      if(obj.visible) {
+        ctx.fillRect (obj.x-25, obj.y-25, 55, 50);
+      }
     }
   };
   var myCamvas = new camvas(ctx, draw);
