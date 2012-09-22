@@ -2,29 +2,33 @@
 
 // If the browser does not support any URL, getUserMedia or
 // In this example call, we will directly draw the webcam stream on a canvas.
-window.onload = function(){
-  var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
-  var draw = function(video, dt) {
-    ctx.drawImage(video, 0, 0);
-    var color = ctx.getImageData(320,240,1,1),
+
+var isOrange = function(ctx, x, y) {
+  var color = ctx.getImageData(x,Math.floor(y),1,1),
         r = color.data[0],
         g = color.data[1],
         b = color.data[2],
         min = Math.min(r,g,b),
         max = Math.max(r,g,b),
-        delta = max-min,
-        h,s,v;
+        delta = max - min;
 
-    if(max > 0) {
-      s = delta / max;
+    return (r > g && r > b) && (delta / max) > 0.50;
+};
+
+window.onload = function(){
+  var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
+  var ypos = 10;
+  var draw = function(video, dt) {
+    ctx.drawImage(video, 0, 0);
+
+    ypos += 10*dt;
+    if(ypos > 640) {
+      ypos = 0;
     }
 
-    var hit = (r > g && r > b) && (delta / max) > 0.50;
-
-
     //var asRGB = "rgb(" + r +"," +g+","+b+")";
-    ctx.fillStyle = hit ? "rgb(255,0,0)" : "rgb(0,0,0)";
-    ctx.fillRect (320, 240, 55, 50);
+    ctx.fillStyle = isOrange(ctx,320,ypos) ? "rgb(255,0,0)" : "rgb(0,0,0)";
+    ctx.fillRect (320, ypos, 55, 50);
   };
   var myCamvas = new camvas(ctx, draw);
 };
@@ -91,7 +95,7 @@ function camvas(ctx, drawFunc) {
       // For some effects, you might want to know how much time is passed
       // since the last frame; that's why we pass along a Delta time `dt`
       // variable (expressed in milliseconds)
-      var dt = Date.now - last;
+      var dt = Date.now() - last;
       self.draw(self.video, dt);
       last = Date.now();
       requestAnimationFrame(loop) ;
