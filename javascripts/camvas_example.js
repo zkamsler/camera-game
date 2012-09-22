@@ -8,7 +8,7 @@ var isColorOrange = function(r, g, b) {
         max = Math.max(r,g,b),
         delta = max - min;
 
-    return (r > g && r > b) && (delta / max) > 0.50;
+    return (r > g && r > b) && (delta / max) > 0.30;
 };
 
 var isOrange = function(ctx, x, y) {
