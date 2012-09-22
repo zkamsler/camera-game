@@ -3,8 +3,16 @@
 // If the browser does not support any URL, getUserMedia or
 // In this example call, we will directly draw the webcam stream on a canvas.
 
+var isColorOrange = function(r, g, b) {
+  var   min = Math.min(r,g,b),
+        max = Math.max(r,g,b),
+        delta = max - min;
+
+    return (r > g && r > b) && (delta / max) > 0.50;
+};
+
 var isOrange = function(ctx, x, y) {
-  var color = ctx.getImageData(x,Math.floor(y),1,1),
+  var color = ctx.getImageData(x,y,1,1),
         r = color.data[0],
         g = color.data[1],
         b = color.data[2],
@@ -13,6 +21,19 @@ var isOrange = function(ctx, x, y) {
         delta = max - min;
 
     return (r > g && r > b) && (delta / max) > 0.50;
+};
+
+var isRectOrange = function(ctx, x, y, w, h) {
+  var colors = ctx.getImageData(x,y,w,h),
+      data = colors.data,
+      max = w*h*4;
+  for(var i = 0; i < max; i+=4) {
+    if(isColorOrange(data[i], data[i+1], data[i+2])) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 
@@ -38,7 +59,7 @@ window.onload = function(){
       visible = true;
     }
 
-    visible = visible && !isOrange(ctx,xpos,ypos);
+    visible = visible && !isRectOrange(ctx, xpos-25, ypos-25, 55, 50);//isOrange(ctx,xpos,ypos);
 
     //var asRGB = "rgb(" + r +"," +g+","+b+")";
     //ctx.fillStyle = isOrange(ctx,xpos,ypos) ? "rgb(255,0,0)" : "rgb(0,0,0)";
