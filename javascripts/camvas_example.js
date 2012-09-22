@@ -15,20 +15,36 @@ var isOrange = function(ctx, x, y) {
     return (r > g && r > b) && (delta / max) > 0.50;
 };
 
+
 window.onload = function(){
   var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
   var ypos = 10;
+  var time = 0;
+  var visible = true;
   var draw = function(video, dt) {
+    ctx.save();
+    ctx.translate(640, 0);
+    ctx.scale(-1,1);
     ctx.drawImage(video, 0, 0);
+    ctx.restore();
 
-    ypos += 10*dt;
+    time += dt;
+
+    var xpos = 320 + Math.sin(time*0.1) * 50;
+
+    ypos += 5*dt;
     if(ypos > 640) {
       ypos = 0;
+      visible = true;
     }
 
+    visible = visible && !isOrange(ctx,xpos,ypos);
+
     //var asRGB = "rgb(" + r +"," +g+","+b+")";
-    ctx.fillStyle = isOrange(ctx,320,ypos) ? "rgb(255,0,0)" : "rgb(0,0,0)";
-    ctx.fillRect (320, ypos, 55, 50);
+    //ctx.fillStyle = isOrange(ctx,xpos,ypos) ? "rgb(255,0,0)" : "rgb(0,0,0)";
+    if(visible) {
+      ctx.fillRect (xpos-25, ypos-25, 55, 50);
+    }
   };
   var myCamvas = new camvas(ctx, draw);
 };
