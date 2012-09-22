@@ -19,21 +19,21 @@ var isOrange = function(ctx, x, y) {
 window.onload = function(){
   var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
   var ypos = 10;
-  var time = 0;
   var visible = true;
-  var draw = function(video, dt) {
+  var width = 640;
+  var height = 480;
+  var halfwidth = width/2;
+  var draw = function(video, dt, time) {
     ctx.save();
-    ctx.translate(640, 0);
+    ctx.translate(width, 0);
     ctx.scale(-1,1);
     ctx.drawImage(video, 0, 0);
     ctx.restore();
 
-    time += dt;
+    var xpos = halfwidth + Math.sin(time*0.005) * 50;
 
-    var xpos = 320 + Math.sin(time*0.1) * 50;
-
-    ypos += 5*dt;
-    if(ypos > 640) {
+    ypos += 0.001 * 100 * dt;
+    if(ypos > width) {
       ypos = 0;
       visible = true;
     }
@@ -111,9 +111,10 @@ function camvas(ctx, drawFunc) {
       // For some effects, you might want to know how much time is passed
       // since the last frame; that's why we pass along a Delta time `dt`
       // variable (expressed in milliseconds)
-      var dt = Date.now() - last;
-      self.draw(self.video, dt);
-      last = Date.now();
+      var now = Date.now();
+      var dt = now - last;
+      self.draw(self.video, dt, now);
+      last = now;
       requestAnimationFrame(loop) ;
     };
     requestAnimationFrame(loop);
