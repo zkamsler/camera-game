@@ -51,6 +51,19 @@ var paintRectOrange = function(ctx, x, y, w, h) {
   ctx.putImageData(colors, 0, 0);
 };
 
+var invertRect = function(ctx, x, y, w, h) {
+  var colors = ctx.getImageData(x,y,w,h),
+      data = colors.data,
+      max = w*h*4;
+  for(var i = 0; i < max; i+=4) {
+    data[i] = 255 - data[i];
+    data[i+1] = 255 - data[i+1];
+    data[i+2] = 255 - data[i+2];
+  }
+
+  ctx.putImageData(colors, 0, 0);
+};
+
 var width = 640;
 var height = 480;
 var halfwidth = width/2;
@@ -149,6 +162,8 @@ window.onload = function(){
 
   var startGenPeriod = 2.5*1000;
   var lastGenTime;
+  var blankTimeout = 0;
+  var blankDuration = 300;
   var difficulty = 1;
   var maxChain = 1;
 
@@ -187,17 +202,25 @@ window.onload = function(){
       if(obj.update(ctx, obj, dt, time)) {
         if(!obj.spoiler) {
           difficulty = 1;
+          blankTimeout = time+blankDuration;
         }
         shapes.splice(i,1);
         --i;
       } else if(isRectOrange(ctx, obj.x-15, obj.y-15, 30, 30)) {
         difficulty = obj.spoiler ? 1 : difficulty+1;
+        if(obj.spoiler) {
+          blankTimeout = time+blankDuration;
+        }
         shapes.splice(i,1);
         --i;
       } else {
         ctx.fillStyle = obj.color;
         ctx.fillRect (obj.x-25, obj.y-25, 55, 50);
       }
+    }
+
+    if(time < blankTimeout) {
+      invertRect(ctx,0,0,width,height);
     }
   };
   var myCamvas = new camvas(ctx, draw);
