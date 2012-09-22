@@ -6,9 +6,10 @@
 var isColorOrange = function(r, g, b) {
   var   min = Math.min(r,g,b),
         max = Math.max(r,g,b),
-        delta = max - min;
+        delta = max - min,
+        average = (r+g+b)/3;
 
-    return (r > g && r > b) && (delta / max) > 0.30;
+    return (r > g && r > b) && ((delta / max) > 0.40) && max > 180 && average > 25 && average < 240;
 };
 
 var isOrange = function(ctx, x, y) {
@@ -36,6 +37,20 @@ var isRectOrange = function(ctx, x, y, w, h) {
   return false;
 };
 
+var paintRectOrange = function(ctx, x, y, w, h) {
+  var colors = ctx.getImageData(x,y,w,h),
+      data = colors.data,
+      max = w*h*4;
+  for(var i = 0; i < max; i+=4) {
+    if(isColorOrange(data[i], data[i+1], data[i+2])) {
+      data[i] = 255;
+      data[i+1] = data[i+2] = 0;
+    }
+  }
+
+  ctx.putImageData(colors, 0, 0);
+};
+
 
 window.onload = function(){
   var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
@@ -55,10 +70,13 @@ window.onload = function(){
     ctx.drawImage(video, 0, 0);
     ctx.restore();
 
+    paintRectOrange(ctx,0,0,width,height);
+    //return;
+
     ypos += 0.001 * speed * dt;
     if(ypos > height+50) {
       ypos = 0;
-      speed = visible ? speed * 1.1 : defaultSpeed;
+      speed = visible ? defaultSpeed : speed * 1.1;
       visible = true;
       entry = (Math.random() * width/ 2) + (width/4);
     }
@@ -66,7 +84,7 @@ window.onload = function(){
 
     var xpos = entry + Math.sin(time*0.005) * 50;
 
-    visible = visible && !isRectOrange(ctx, xpos-5, ypos-5, 10, 10);//isOrange(ctx,xpos,ypos);
+    visible = visible && !isRectOrange(ctx, xpos-15, ypos-15, 30, 30);//isOrange(ctx,xpos,ypos);
 
     //var asRGB = "rgb(" + r +"," +g+","+b+")";
     //ctx.fillStyle = isOrange(ctx,xpos,ypos) ? "rgb(255,0,0)" : "rgb(0,0,0)";
