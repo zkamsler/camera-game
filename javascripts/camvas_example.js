@@ -75,7 +75,7 @@ var genFaller = function(difficulty) {
   return {
     y : -25,
     x : 0,
-    speed : 200 + 50*difficulty*(Math.random()+0.5),
+    speed : 200 + 50*Math.sqrt(difficulty)*(Math.random()+0.5),
     entry : (Math.random() * width/ 2) + (width/4),
     update: updateFall
   };
@@ -85,7 +85,7 @@ var genLeft = function(difficulty) {
   return {
     y : (Math.random() * height/2) + (height/8),
     x : -25,
-    speed : 300 + 100*difficulty*(Math.random()+0.5),
+    speed : 300 + 100*Math.sqrt(difficulty)*(Math.random()+0.5),
     update: updateLeft
   };
 };
@@ -94,7 +94,7 @@ var genRight = function(difficulty) {
   return {
     y : (Math.random() * height/2) + (height/8),
     x : width+25,
-    speed : 300 + 100*difficulty*(Math.random()+0.5),
+    speed : 250 + 75*Math.sqrt(difficulty)*(Math.random()+0.5),
     update: updateRight
   };
 };
@@ -123,6 +123,9 @@ window.onload = function(){
     ctx.scale(-1,1);
     ctx.drawImage(video, 0, 0);
     ctx.restore();
+
+    ctx.font = "24pt Helvetica";
+    ctx.fillText("Chain: "+difficulty, 10, 50);
 
     paintRectOrange(ctx,0,0,width,height);
     //return;
