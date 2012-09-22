@@ -9,7 +9,7 @@ var isColorOrange = function(r, g, b) {
         delta = max - min,
         average = (r+g+b)/3;
 
-    return (r > g && r > b) && ((delta / max) > 0.45) && max > 180 && average > 25 && average < 245;
+    return (r > g && r > b) && ((delta / max) > 0.35) && max > 100 && average > 25 && average < 245;
 };
 
 var isOrange = function(ctx, x, y) {
