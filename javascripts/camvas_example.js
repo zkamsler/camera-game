@@ -9,7 +9,7 @@ var isColorOrange = function(r, g, b) {
         delta = max - min,
         average = (r+g+b)/3;
 
-    return (r > g && r > b) && ((delta / max) > 0.40) && max > 180 && average > 25 && average < 235;
+    return (r > g && r > b) && ((delta / max) > 0.45) && max > 180 && average > 25 && average < 235;
 };
 
 var isOrange = function(ctx, x, y) {
@@ -57,36 +57,64 @@ var halfwidth = width/2;
 
 var updateFall = function(ctx, obj, dt, time) {
   obj.y += 0.001 * obj.speed * dt;
-  if(obj.y > height+50) {
-    obj.y = 0;
-    obj.speed = obj.visible ? obj.defaultSpeed : obj.speed * 1.1;
-    obj.visible = true;
-    obj.entry = (Math.random() * width/ 2) + (width/4);
-  }
-
   obj.x = obj.entry + Math.sin(time*0.005) * 50;
+  return (obj.y > height+50);
 };
+
+var updateLeft = function(ctx, obj, dt, time) {
+  obj.x += 0.001 * obj.speed * dt;
+  return (obj.x > width+50);
+};
+
+var updateRight = function(ctx, obj, dt, time) {
+  obj.x -= 0.001 * obj.speed * dt;
+  return (obj.x < -50);
+};
+
+var genFaller = function(difficulty) {
+  return {
+    y : -25,
+    x : 0,
+    speed : 200 + 50*difficulty*(Math.random()+0.5),
+    entry : (Math.random() * width/ 2) + (width/4),
+    update: updateFall
+  };
+};
+
+var genLeft = function(difficulty) {
+  return {
+    y : (Math.random() * height/2) + (height/8),
+    x : -25,
+    speed : 300 + 100*difficulty*(Math.random()+0.5),
+    update: updateLeft
+  };
+};
+
+var genRight = function(difficulty) {
+  return {
+    y : (Math.random() * height/2) + (height/8),
+    x : width+25,
+    speed : 300 + 100*difficulty*(Math.random()+0.5),
+    update: updateRight
+  };
+};
+
+var generators = [
+  genLeft,
+  genFaller,
+  genRight
+];
 
 
 window.onload = function(){
   var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
 
+  var startGenPeriod = 3*1000;
+  var lastGenTime;
+  var difficulty = 1;
+
   var shapes = [
-  {
-    y : 900,
-    x : halfwidth,
-    speed : 0,
-    entry : halfwidth,
-    visible : true,
-    defaultSpeed : 150
-  },
-  {
-    y : 900,
-    speed : 0,
-    entry : 200,
-    visible : true,
-    defaultSpeed : 200
-  }
+    genFaller(difficulty)
   ];
 
   var draw = function(video, dt, time) {
@@ -99,11 +127,27 @@ window.onload = function(){
     paintRectOrange(ctx,0,0,width,height);
     //return;
 
+    if(lastGenTime === undefined) {
+      lastGenTime = time;
+    }
+
+    if(lastGenTime + startGenPeriod/Math.sqrt(difficulty) < time) {
+      var newShape = generators[Math.floor(Math.random() * generators.length)](difficulty);
+      shapes.push(newShape);
+      lastGenTime = time;
+    }
+
     for(var i = 0; i < shapes.length; ++i) {
       var obj = shapes[i];
-      updateFall(ctx, obj, dt, time);
-      obj.visible = obj.visible && !isRectOrange(ctx, obj.x-15, obj.y-15, 30, 30);
-      if(obj.visible) {
+      if(obj.update(ctx, obj, dt, time)) {
+        difficulty = 1;
+        shapes.splice(i,1);
+        --i;
+      } else if(isRectOrange(ctx, obj.x-15, obj.y-15, 30, 30)) {
+        difficulty++;
+        shapes.splice(i,1);
+        --i;
+      } else {
         ctx.fillRect (obj.x-25, obj.y-25, 55, 50);
       }
     }
