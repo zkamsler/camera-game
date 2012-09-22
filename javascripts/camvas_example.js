@@ -44,6 +44,10 @@ window.onload = function(){
   var width = 640;
   var height = 480;
   var halfwidth = width/2;
+  var entry = halfwidth;
+  var defaultSpeed = 200;
+  var speed = defaultSpeed;
+
   var draw = function(video, dt, time) {
     ctx.save();
     ctx.translate(width, 0);
@@ -51,15 +55,18 @@ window.onload = function(){
     ctx.drawImage(video, 0, 0);
     ctx.restore();
 
-    var xpos = halfwidth + Math.sin(time*0.005) * 50;
-
-    ypos += 0.001 * 100 * dt;
-    if(ypos > width) {
+    ypos += 0.001 * speed * dt;
+    if(ypos > height+50) {
       ypos = 0;
+      speed = visible ? speed * 1.1 : defaultSpeed;
       visible = true;
+      entry = (Math.random() * width/ 2) + (width/4);
     }
 
-    visible = visible && !isRectOrange(ctx, xpos-25, ypos-25, 55, 50);//isOrange(ctx,xpos,ypos);
+
+    var xpos = entry + Math.sin(time*0.005) * 50;
+
+    visible = visible && !isRectOrange(ctx, xpos-5, ypos-5, 10, 10);//isOrange(ctx,xpos,ypos);
 
     //var asRGB = "rgb(" + r +"," +g+","+b+")";
     //ctx.fillStyle = isOrange(ctx,xpos,ypos) ? "rgb(255,0,0)" : "rgb(0,0,0)";
