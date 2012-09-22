@@ -9,7 +9,7 @@ var isColorOrange = function(r, g, b) {
         delta = max - min,
         average = (r+g+b)/3;
 
-    return (r > g && r > b) && ((delta / max) > 0.45) && max > 180 && average > 25 && average < 235;
+    return (r > g && r > b) && ((delta / max) > 0.45) && max > 180 && average > 25 && average < 245;
 };
 
 var isOrange = function(ctx, x, y) {
@@ -71,6 +71,23 @@ var updateRight = function(ctx, obj, dt, time) {
   return (obj.x < -50);
 };
 
+var updatePeekUp = function(ctx, obj, dt, time) {
+  obj.y -= 0.001 * obj.speed * dt;
+  return (obj.y < -50);
+};
+
+var updatePeekDown = function(ctx, obj, dt, time) {
+  obj.y += 0.001 * obj.speed * dt;
+  if(obj.y > height/2) {
+    obj.update = updatePeekUp;
+  }
+};
+
+
+
+var defaultColor = "rgb(10,10,10)";
+var spoilerColor = "rgb(0,0,255)";
+
 var genFaller = function(difficulty) {
   return {
     y : -25,
@@ -85,7 +102,7 @@ var genLeft = function(difficulty) {
   return {
     y : (Math.random() * height/2) + (height/8),
     x : -25,
-    speed : 300 + 100*Math.sqrt(difficulty)*(Math.random()+0.5),
+    speed : 200 + 50*Math.sqrt(difficulty)*(Math.random()+0.5),
     update: updateLeft
   };
 };
@@ -94,24 +111,46 @@ var genRight = function(difficulty) {
   return {
     y : (Math.random() * height/2) + (height/8),
     x : width+25,
-    speed : 250 + 75*Math.sqrt(difficulty)*(Math.random()+0.5),
+    speed : 200 + 50*Math.sqrt(difficulty)*(Math.random()+0.5),
     update: updateRight
+  };
+};
+
+var genPeeker = function(difficulty) {
+  return {
+    y : -25,
+    x : (Math.random() * width/ 2) + (width/4),
+    speed : 100 + 30*Math.sqrt(difficulty)*(Math.random()+0.25),
+    update: updatePeekDown
   };
 };
 
 var generators = [
   genLeft,
   genFaller,
-  genRight
+  genRight,
+  genPeeker
 ];
+
+var generate = function(difficulty) {
+  var shape = generators[Math.floor(Math.random() * generators.length)](difficulty);
+  if(Math.random() < 0.2) {
+    shape.spoiler = true;
+    shape.color = spoilerColor;
+  } else {
+    shape.color = defaultColor;
+  }
+  return shape;
+};
 
 
 window.onload = function(){
   var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
 
-  var startGenPeriod = 3*1000;
+  var startGenPeriod = 2.5*1000;
   var lastGenTime;
   var difficulty = 1;
+  var maxChain = 1;
 
   var shapes = [
     genFaller(difficulty)
@@ -124,8 +163,12 @@ window.onload = function(){
     ctx.drawImage(video, 0, 0);
     ctx.restore();
 
+    maxChain = Math.max(difficulty,maxChain);
+
+    ctx.fillStyle = "blue";
     ctx.font = "24pt Helvetica";
-    ctx.fillText("Chain: "+difficulty, 10, 50);
+    ctx.fillText("Chain: "+difficulty, 10, 30);
+    ctx.fillText("Max: "+maxChain, 10, 60);
 
     paintRectOrange(ctx,0,0,width,height);
     //return;
@@ -135,22 +178,24 @@ window.onload = function(){
     }
 
     if(lastGenTime + startGenPeriod/Math.sqrt(difficulty) < time) {
-      var newShape = generators[Math.floor(Math.random() * generators.length)](difficulty);
-      shapes.push(newShape);
+      shapes.push(generate(difficulty));
       lastGenTime = time;
     }
 
     for(var i = 0; i < shapes.length; ++i) {
       var obj = shapes[i];
       if(obj.update(ctx, obj, dt, time)) {
-        difficulty = 1;
+        if(!obj.spoiler) {
+          difficulty = 1;
+        }
         shapes.splice(i,1);
         --i;
       } else if(isRectOrange(ctx, obj.x-15, obj.y-15, 30, 30)) {
-        difficulty++;
+        difficulty = obj.spoiler ? 1 : difficulty+1;
         shapes.splice(i,1);
         --i;
       } else {
+        ctx.fillStyle = obj.color;
         ctx.fillRect (obj.x-25, obj.y-25, 55, 50);
       }
     }
