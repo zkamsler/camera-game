@@ -56,9 +56,11 @@ var invertRect = function(ctx, x, y, w, h) {
       data = colors.data,
       max = w*h*4;
   for(var i = 0; i < max; i+=4) {
-    data[i] = 255 - data[i];
-    data[i+1] = 255 - data[i+1];
-    data[i+2] = 255 - data[i+2];
+    var average = (data[i]+data[i+1]+data[i+2])/3;
+    data[i] = data[i+1] = data[i+2] = average+10;
+    /*data[i] = (data[i]+average)/2;
+    data[i+1] = (data[i+1]+average)/2;
+    data[i+2] = (data[i+2]+average)/2;*/
   }
 
   ctx.putImageData(colors, 0, 0);
