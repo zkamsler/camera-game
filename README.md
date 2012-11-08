@@ -1,20 +1,11 @@
-# Camvas
+# Destroy Oppressive Shapes with Orange-Colored Objects
 
-A simple HTML5 library to stream a webcam video to a `<canvas>` object. 
+A simple camera-based game I wrote during an eight hour game jam at the 2012 Boston Festival of Indie Games. It does not the most efficiently or robustly implemented, but it can be pretty fun.
 
-Uses WebRTC (getUserMedia), Canvas and HTML5 Video
+Wave bright orange-colored objects on screen, and try to hit black squares, while avoiding blue ones. The longer one goes without missing, the faster it gets. The portions detected as orange are highlighted in red. The color detection is fairly rudimentary, and lighting dependent (I had too keep adjusting it as the day progressed), so your success may vary.
 
-## Example usage:
-  ```javascript
-  window.onload = function(){
-    var ctx = document.getElementsByTagName('canvas')[0].getContext('2d')
-    var draw = function(video, dt) {
-      ctx.drawImage(video, 0, 0)
-    }
-    var myCamvas = new camvas(ctx, draw)
-  }
-  ```
+Uses WebRTC (getUserMedia), Canvas and HTML5 Video. Based on @cbrandolino/camvas.
 
-## Homepage
+## Demo
 
-You can find annotated source code, demo and useful resources at [http://cbrandolino.github.com/camvas](http://cbrandolino.github.com/camvas)
+Play at http://zkamsler.github.com/OrangeCameraGame

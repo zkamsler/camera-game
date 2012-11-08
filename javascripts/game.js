@@ -1,7 +1,4 @@
-// # Example call for the demo at http//cbrandolino.github.com/camvas
 
-// If the browser does not support any URL, getUserMedia or
-// In this example call, we will directly draw the webcam stream on a canvas.
 
 var isColorOrange = function(r, g, b) {
   var   min = Math.min(r,g,b),
@@ -9,7 +6,7 @@ var isColorOrange = function(r, g, b) {
         delta = max - min,
         average = (r+g+b)/3;
 
-    return (r > g && r > b) && ((delta / max) > 0.35) && max > 100 && average > 25 && average < 245;
+    return (r > g && r > b) && ((delta / max) > 0.45) && max > 140 && average > 25 && average < 245;
 };
 
 var isOrange = function(ctx, x, y) {
