@@ -8,4 +8,4 @@ Uses WebRTC (getUserMedia), Canvas and HTML5 Video. Based on @cbrandolino/camvas
 
 ## Demo
 
-Play at http://zkamsler.github.com/OrangeCameraGame
+Play at http://zkamsler.github.com/camera-game
